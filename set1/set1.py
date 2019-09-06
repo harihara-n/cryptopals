@@ -1,4 +1,4 @@
-#!/usr/local/bin/python3.7
+#!./bin/python3.7
 
 #
 # Cryptopals Set 1 - https://cryptopals.com/sets/1
@@ -6,6 +6,7 @@
 
 from binascii import hexlify, unhexlify
 from base64 import b64encode
+import requests
 
 def hex_string_to_byte_string(hex_string):
   return unhexlify(hex_string)
@@ -82,3 +83,16 @@ for byte in range(256):
     max_score = score
     answer_bytes_string = bytes_string
 print("Challenge 3: {0}".format(answer_bytes_string))
+
+# Challenge 4: https://cryptopals.com/sets/1/challenges/4
+hex_strings = requests.get('https://cryptopals.com/static/challenge-data/4.txt').text.split()
+answer_bytes_string = b''
+max_score = 0
+for hex_string in hex_strings:
+  for byte in range(256):
+    bytes_string = xor_byte_string_with_byte(hex_string_to_byte_string(hex_string), byte).strip()
+    score = score_byte_string_on_english_characters_frequency(bytes_string)
+    if max_score < score:
+      max_score = score
+      answer_bytes_string = bytes_string
+print("Challenge 4: {0}".format(answer_bytes_string))
