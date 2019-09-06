@@ -27,9 +27,9 @@ def xor_two_byte_strings(byte_string_1, byte_string_2):
   max_len_bytearray = (byte_array_1 if len(bytearray_1) > len(bytearray_2) else bytearray_2)
 
   bytearray_result = bytearray([])
-  for index in xrange(len(min_len_bytearray)):
+  for index in range(len(min_len_bytearray)):
     bytearray_result.append(bytearray_1[index] ^ bytearray_2[index])
-  for index in xrange(len(min_len_bytearray), len(max_len_bytearray)):
+  for index in range(len(min_len_bytearray), len(max_len_bytearray)):
     bytearray_result.append(max_len_bytearray[index])
 
   bytearray_result.reverse()
