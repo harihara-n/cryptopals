@@ -90,7 +90,7 @@ answer_bytes_string = b''
 max_score = 0
 for hex_string in hex_strings:
   for byte in range(256):
-    bytes_string = xor_byte_string_with_byte(hex_string_to_byte_string(hex_string), byte).strip()
+    bytes_string = xor_byte_string_with_byte(hex_string_to_byte_string(hex_string), byte)
     score = score_byte_string_on_english_characters_frequency(bytes_string)
     if max_score < score:
       max_score = score
