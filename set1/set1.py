@@ -63,6 +63,15 @@ def score_byte_string_on_english_characters_frequency(bytes_string):
   return score
 
 
+def xor_byte_string_with_repeating_bytes(byte_string, repeating_bytes):
+  return_bytes = b''
+  for i, byte in enumerate(byte_string):
+    return_bytes += (bytes([byte ^ repeating_bytes[i % len(repeating_bytes)]]))
+  return return_bytes
+
+def encrypt_with_repeating_key_xor(string, key):
+  return byte_string_to_hex_string(xor_byte_string_with_repeating_bytes(string.encode('utf-8'), key.encode('utf-8')))
+
 # Challenge 1: https://cryptopals.com/sets/1/challenges/1
 hex_string = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
 print("Challenge 1: {0}".format(hex_string_to_b64_string(hex_string)))
@@ -96,3 +105,9 @@ for hex_string in hex_strings:
       max_score = score
       answer_bytes_string = bytes_string
 print("Challenge 4: {0}".format(answer_bytes_string))
+
+# Challenge 5: https://cryptopals.com/sets/1/challenges/5
+string = '''Burning 'em, if you ain't quick and nimble
+I go crazy when I hear a cymbal'''
+key = "ICE"
+print("Challenge 5: {0}".format(encrypt_with_repeating_key_xor(string, key)))
