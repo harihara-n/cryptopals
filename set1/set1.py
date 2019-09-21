@@ -6,6 +6,7 @@
 
 from binascii import hexlify, unhexlify
 from base64 import b64encode, b64decode
+from Crypto.Cipher import AES
 import itertools
 import requests
 import pdb
@@ -178,7 +179,7 @@ I go crazy when I hear a cymbal'''
 key = "ICE"
 print("Challenge 5: {0}".format(encrypt_with_repeating_key_xor(string, key)))
 
-# Challenge 6: https://cryptopals.com/sets/1/challenges/5
+# Challenge 6: https://cryptopals.com/sets/1/challenges/6
 print("Challenge 6: ")
 b64_string = requests.get('https://cryptopals.com/static/challenge-data/6.txt').text.strip()
 byte_string = b64_string_to_byte_string(b64_string)
@@ -188,3 +189,10 @@ for key in keys:
   original_byte_string = xor_byte_string_with_repeating_bytes(byte_string, key)
   print(original_byte_string)
   print(key)
+
+# Challenge 7: https://cryptopals.com/sets/1/challenges/7
+b64_string = requests.get('https://cryptopals.com/static/challenge-data/7.txt').text.strip()
+encrypted_byte_string = b64_string_to_byte_string(b64_string) 
+key = b'YELLOW SUBMARINE'
+aes = AES.new(key, AES.MODE_ECB)
+print("Challenge 7: {0}".format(aes.decrypt(encrypted_byte_string)))
