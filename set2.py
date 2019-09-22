@@ -9,6 +9,7 @@ import pdb
 import requests
 import set1
 import secrets
+from collections import Counter
 
 def do_pkcs7_padding(byte_string, pad_length):
   return_byte_string = bytes(byte_string)
@@ -49,6 +50,57 @@ def aes128_cbc_encrypt(text, iv, key):
 def generate_aes_key(num_bytes):
   return secrets.token_bytes(num_bytes)
 
+def encryption_oracle(input_bytes):
+  key = generate_aes_key(16)
+
+  # Prepend prepend_num_bytes random bytes. Choose prepend_num_bytes randomly from 5 - 10.
+  # Also postpend random bytes till you reach multiple of 16 bytes in length.
+  prepend_num_bytes = 5 + secrets.randbelow(6)
+  postpend_num_bytes = 16 - ((prepend_num_bytes + len(input_bytes)) % 16)
+  input_bytes = secrets.token_bytes(prepend_num_bytes) + input_bytes + secrets.token_bytes(postpend_num_bytes)
+
+  # Choose 0 or 1 at random
+  # For 0, choose ECB mode.
+  # For 1, choose CBC mode.
+  random_mode = secrets.randbelow(2)
+
+  if random_mode == 0:
+    print("Using AES Mode: ECB")
+    aes = AES.new(key, AES.MODE_ECB)
+    return aes.encrypt(input_bytes)
+
+  print("Using AES Mode: CBC")
+  iv = secrets.token_bytes(16)
+  return aes128_cbc_encrypt(input_bytes, iv, key)
+
+def detect_aes_mode_for_oracle():
+  # We provide an input with 43 same bytes (we choose byte 100)
+  input_bytes = bytes([100]*43)
+  encrypted_bytes = encryption_oracle(input_bytes)
+
+  # If it is EBC mode, there WILL be two 16 bytes long bytes sequence, occurring after one another
+  # that will have the same byte sequence.
+  # If not, it is CBC.
+  def is_ecb_condition(encrypted_bytes, index):
+    for x in range(16):
+      if encrypted_bytes[index + x] != encrypted_bytes[index + x + 16]:
+        return False
+    return True
+
+  counter = Counter(encrypted_bytes)
+  is_ecb = False
+  for i, byte in enumerate(encrypted_bytes):
+    if i + 31 > len(encrypted_bytes):
+      break
+    if counter[byte] > 1:
+      if is_ecb_condition(encrypted_bytes, i):
+        is_ecb = True
+        break
+  if is_ecb:
+    print("Detected AES mode: ECB")
+  else:
+    print("Detected AES mode: CBC")
+
 
 if __name__ == '__main__':
   # Challenge 9: https://cryptopals.com/sets/2/challenges/9
@@ -61,3 +113,7 @@ if __name__ == '__main__':
   iv = bytes([0] * 16)
   key = b'YELLOW SUBMARINE'
   print("Challenge 10: {0}".format(aes128_cbc_decrypt(byte_string, iv, key)))
+
+  # Challenge 11: https://cryptopals.com/sets/2/challenges/11
+  print("Challenge 11:")
+  detect_aes_mode_for_oracle()
