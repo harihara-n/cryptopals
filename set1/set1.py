@@ -196,3 +196,14 @@ encrypted_byte_string = b64_string_to_byte_string(b64_string)
 key = b'YELLOW SUBMARINE'
 aes = AES.new(key, AES.MODE_ECB)
 print("Challenge 7: {0}".format(aes.decrypt(encrypted_byte_string)))
+
+# Challenge 7: https://cryptopals.com/sets/1/challenges/8
+hex_strings = requests.get('https://cryptopals.com/static/challenge-data/8.txt').text.strip().split('\n')
+# In the hex string encrypted using AES 128 in ECB mode, there is a chance that some two 16 byte blocks will
+# be the same. So, we select all the hex_strings in which there is such an occurrence.
+possible_aes_128_ecb_ciphers = []
+for hex_string in hex_strings:
+  chunks = list(map(lambda x: ''.join(x), split_into_n_sized_chunks(hex_string, 32)))
+  if len(chunks) > len(set(chunks)):
+    possible_aes_128_ecb_ciphers.append(hex_string)
+print("Challenge 8: {0}".format(possible_aes_128_ecb_ciphers))
