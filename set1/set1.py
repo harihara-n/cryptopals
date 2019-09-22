@@ -139,71 +139,72 @@ def get_possible_key_for_keysizes(byte_string, possible_key_sizes):
   return keys
 
 
-# Challenge 1: https://cryptopals.com/sets/1/challenges/1
-hex_string = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
-print("Challenge 1: {0}".format(hex_string_to_b64_string(hex_string)))
+if __name__ == "__main__":
+  # Challenge 1: https://cryptopals.com/sets/1/challenges/1
+  hex_string = "49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d"
+  print("Challenge 1: {0}".format(hex_string_to_b64_string(hex_string)))
 
-# Challenge 2: https://cryptopals.com/sets/1/challenges/2
-hex_string_1 = "1c0111001f010100061a024b53535009181c"
-hex_string_2 = "686974207468652062756c6c277320657965"
-print("Challenge 2: {0}".format(xor_two_hex_strings(hex_string_1, hex_string_2)))
+  # Challenge 2: https://cryptopals.com/sets/1/challenges/2
+  hex_string_1 = "1c0111001f010100061a024b53535009181c"
+  hex_string_2 = "686974207468652062756c6c277320657965"
+  print("Challenge 2: {0}".format(xor_two_hex_strings(hex_string_1, hex_string_2)))
 
-# Challenge 3: https://cryptopals.com/sets/1/challenges/3
-hex_string = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
-answer_bytes_string = b''
-max_score = 0
-for byte in range(256):
-  bytes_string = xor_byte_string_with_byte(hex_string_to_byte_string(hex_string), byte)
-  score = score_byte_string_on_english_characters_frequency(bytes_string)
-  if max_score < score:
-    max_score = score
-    answer_bytes_string = bytes_string
-print("Challenge 3: {0}".format(answer_bytes_string))
-
-# Challenge 4: https://cryptopals.com/sets/1/challenges/4
-hex_strings = requests.get('https://cryptopals.com/static/challenge-data/4.txt').text.split()
-answer_bytes_string = b''
-max_score = 0
-for hex_string in hex_strings:
+  # Challenge 3: https://cryptopals.com/sets/1/challenges/3
+  hex_string = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736"
+  answer_bytes_string = b''
+  max_score = 0
   for byte in range(256):
     bytes_string = xor_byte_string_with_byte(hex_string_to_byte_string(hex_string), byte)
     score = score_byte_string_on_english_characters_frequency(bytes_string)
     if max_score < score:
       max_score = score
       answer_bytes_string = bytes_string
-print("Challenge 4: {0}".format(answer_bytes_string))
+  print("Challenge 3: {0}".format(answer_bytes_string))
 
-# Challenge 5: https://cryptopals.com/sets/1/challenges/5
-string = '''Burning 'em, if you ain't quick and nimble
-I go crazy when I hear a cymbal'''
-key = "ICE"
-print("Challenge 5: {0}".format(encrypt_with_repeating_key_xor(string, key)))
+  # Challenge 4: https://cryptopals.com/sets/1/challenges/4
+  hex_strings = requests.get('https://cryptopals.com/static/challenge-data/4.txt').text.split()
+  answer_bytes_string = b''
+  max_score = 0
+  for hex_string in hex_strings:
+    for byte in range(256):
+      bytes_string = xor_byte_string_with_byte(hex_string_to_byte_string(hex_string), byte)
+      score = score_byte_string_on_english_characters_frequency(bytes_string)
+      if max_score < score:
+        max_score = score
+        answer_bytes_string = bytes_string
+  print("Challenge 4: {0}".format(answer_bytes_string))
 
-# Challenge 6: https://cryptopals.com/sets/1/challenges/6
-print("Challenge 6: ")
-b64_string = requests.get('https://cryptopals.com/static/challenge-data/6.txt').text.strip()
-byte_string = b64_string_to_byte_string(b64_string)
-key_sizes = get_x_most_possible_key_sizes_for_cipher(byte_string, 4)
-keys = get_possible_key_for_keysizes(byte_string, key_sizes)
-for key in keys:
-  original_byte_string = xor_byte_string_with_repeating_bytes(byte_string, key)
-  print(original_byte_string)
-  print(key)
+  # Challenge 5: https://cryptopals.com/sets/1/challenges/5
+  string = '''Burning 'em, if you ain't quick and nimble
+  I go crazy when I hear a cymbal'''
+  key = "ICE"
+  print("Challenge 5: {0}".format(encrypt_with_repeating_key_xor(string, key)))
 
-# Challenge 7: https://cryptopals.com/sets/1/challenges/7
-b64_string = requests.get('https://cryptopals.com/static/challenge-data/7.txt').text.strip()
-encrypted_byte_string = b64_string_to_byte_string(b64_string) 
-key = b'YELLOW SUBMARINE'
-aes = AES.new(key, AES.MODE_ECB)
-print("Challenge 7: {0}".format(aes.decrypt(encrypted_byte_string)))
+  # Challenge 6: https://cryptopals.com/sets/1/challenges/6
+  print("Challenge 6: ")
+  b64_string = requests.get('https://cryptopals.com/static/challenge-data/6.txt').text.strip()
+  byte_string = b64_string_to_byte_string(b64_string)
+  key_sizes = get_x_most_possible_key_sizes_for_cipher(byte_string, 4)
+  keys = get_possible_key_for_keysizes(byte_string, key_sizes)
+  for key in keys:
+    original_byte_string = xor_byte_string_with_repeating_bytes(byte_string, key)
+    print(original_byte_string)
+    print(key)
 
-# Challenge 7: https://cryptopals.com/sets/1/challenges/8
-hex_strings = requests.get('https://cryptopals.com/static/challenge-data/8.txt').text.strip().split('\n')
-# In the hex string encrypted using AES 128 in ECB mode, there is a chance that some two 16 byte blocks will
-# be the same. So, we select all the hex_strings in which there is such an occurrence.
-possible_aes_128_ecb_ciphers = []
-for hex_string in hex_strings:
-  chunks = list(map(lambda x: ''.join(x), split_into_n_sized_chunks(hex_string, 32)))
-  if len(chunks) > len(set(chunks)):
-    possible_aes_128_ecb_ciphers.append(hex_string)
-print("Challenge 8: {0}".format(possible_aes_128_ecb_ciphers))
+  # Challenge 7: https://cryptopals.com/sets/1/challenges/7
+  b64_string = requests.get('https://cryptopals.com/static/challenge-data/7.txt').text.strip()
+  encrypted_byte_string = b64_string_to_byte_string(b64_string) 
+  key = b'YELLOW SUBMARINE'
+  aes = AES.new(key, AES.MODE_ECB)
+  print("Challenge 7: {0}".format(aes.decrypt(encrypted_byte_string)))
+
+  # Challenge 7: https://cryptopals.com/sets/1/challenges/8
+  hex_strings = requests.get('https://cryptopals.com/static/challenge-data/8.txt').text.strip().split('\n')
+  # In the hex string encrypted using AES 128 in ECB mode, there is a chance that some two 16 byte blocks will
+  # be the same. So, we select all the hex_strings in which there is such an occurrence.
+  possible_aes_128_ecb_ciphers = []
+  for hex_string in hex_strings:
+    chunks = list(map(lambda x: ''.join(x), split_into_n_sized_chunks(hex_string, 32)))
+    if len(chunks) > len(set(chunks)):
+      possible_aes_128_ecb_ciphers.append(hex_string)
+  print("Challenge 8: {0}".format(possible_aes_128_ecb_ciphers))
