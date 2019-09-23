@@ -13,7 +13,7 @@ from collections import Counter
 
 def do_pkcs7_padding(byte_string, pad_length):
   return_byte_string = bytes(byte_string)
-  length_to_pad = pad_length - len(return_byte_string)
+  length_to_pad = pad_length - (len(return_byte_string) % pad_length)
   return_byte_string += bytes([length_to_pad] * length_to_pad)
   return return_byte_string
 
@@ -56,8 +56,11 @@ def encryption_oracle(input_bytes):
   # Prepend prepend_num_bytes random bytes. Choose prepend_num_bytes randomly from 5 - 10.
   # Also postpend random bytes till you reach multiple of 16 bytes in length.
   prepend_num_bytes = 5 + secrets.randbelow(6)
-  postpend_num_bytes = 16 - ((prepend_num_bytes + len(input_bytes)) % 16)
-  input_bytes = secrets.token_bytes(prepend_num_bytes) + input_bytes + secrets.token_bytes(postpend_num_bytes)
+  postpend_num_bytes = 5 + secrets.randbelow(6)
+  input_bytes = do_pkcs7_padding(
+    secrets.token_bytes(prepend_num_bytes) + input_bytes + secrets.token_bytes(postpend_num_bytes),
+    16,
+  )
 
   # Choose 0 or 1 at random
   # For 0, choose ECB mode.
