@@ -104,6 +104,32 @@ def detect_aes_mode_for_oracle():
   else:
     print("Detected AES mode: CBC")
 
+def encryption_oracle_modified(input_bytes, key):
+  unknown_b64_string = '''Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkg
+  aGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBq
+  dXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUg
+  YnkK'''
+  unknown_bytes = set1.b64_string_to_byte_string(unknown_b64_string)
+  input_bytes = do_pkcs7_padding(input_bytes + unknown_bytes, 16)
+  aes = AES.new(key, AES.MODE_ECB)
+  return aes.encrypt(input_bytes)
+
+def find_appended_bytes():
+  key = generate_aes_key(16)
+  discovered_bytes = bytes([])
+  for x in range(143, 4, -1):
+    test_bytes = bytes([100] * x)
+    encrypted_bytes_dict = dict()
+    for byte in range(256):
+      encrypted_bytes = encryption_oracle_modified(test_bytes + discovered_bytes + bytes([byte]), key)
+      encrypted_bytes_dict[encrypted_bytes[:144]] = byte
+    actual_encrypted_bytes = encryption_oracle_modified(test_bytes, key)[:144]
+    byte = encrypted_bytes_dict.get(actual_encrypted_bytes, None)
+    if byte == None:
+      raise 'Something went wrong...'
+    discovered_bytes += bytes([byte])
+  return discovered_bytes
+
 
 if __name__ == '__main__':
   # Challenge 9: https://cryptopals.com/sets/2/challenges/9
@@ -120,3 +146,9 @@ if __name__ == '__main__':
   # Challenge 11: https://cryptopals.com/sets/2/challenges/11
   print("Challenge 11:")
   detect_aes_mode_for_oracle()
+
+  # Challenge 12: https://cryptopals.com/sets/2/challenges/12
+  # By feeding "A", "AA", "AAA", etc. we find that the length of the append unknown bytes string
+  # used in encryption_oracle_modified is 139.
+  # By feeding bytes([100]*32), we also verify that encryption_oracle_modified is doing AES in ECB mode.
+  print("Challenge 12: {0}".format(find_appended_bytes()))
