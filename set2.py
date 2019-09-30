@@ -130,6 +130,36 @@ def find_appended_bytes():
     discovered_bytes += bytes([byte])
   return discovered_bytes
 
+def decode_key_value_string(string):
+  return dict(map(lambda kv: tuple(kv.split("=")), string.split("&")))
+
+def profile_for_encrypted(email):
+  if "&" in email or "=" in email:
+    raise "email: {0} cannot contain & or = characters".format(email)
+  key = '"provide" that to the "attacker"'
+  return aes_ecb_encrypt("email={0}&uid=10&role=user".format(email).encode('utf-8'), key)
+
+def decrypt_encrypted_profile(encrypted_bytes):
+  key = '"provide" that to the "attacker"'
+  return decrypt_aes_ecb_encrypted_user_profile(encrypted_bytes, key)
+
+def aes_ecb_encrypt(byte_string, key):
+  aes = AES.new(key, AES.MODE_ECB)
+  byte_string = do_pkcs7_padding(byte_string, 16)
+  return aes.encrypt(byte_string)
+
+def decrypt_aes_ecb_encrypted_user_profile(encrypted_bytes, key):
+  aes = AES.new(key, AES.MODE_ECB)
+  decrypted_bytes = aes.decrypt(encrypted_bytes)
+
+  # We might want to switch to a padding where we always padding applied, even if length % 16 == 0.
+  # Otherwise there is some ambiguity to knowing if we
+  # padded the input bytes or not. Let's move on for now.
+  num_padded = decrypted_bytes[-1]
+  if num_padded > 0 and num_padded <= 15:
+    decrypted_bytes = decrypted_bytes[:-num_padded]
+  return decode_key_value_string(decrypted_bytes.decode('utf-8'))
+
 
 if __name__ == '__main__':
   # Challenge 9: https://cryptopals.com/sets/2/challenges/9
@@ -152,3 +182,13 @@ if __name__ == '__main__':
   # used in encryption_oracle_modified is 139.
   # By feeding bytes([100]*32), we also verify that encryption_oracle_modified is doing AES in ECB mode.
   print("Challenge 12: {0}".format(find_appended_bytes()))
+
+  # Challenge 13: https://cryptopals.com/sets/2/challenges/13
+  print("Challenge 13:")
+  encrypted_profile = profile_for_encrypted('foo@bar.com')
+  decrypted_profile = decrypt_encrypted_profile(encrypted_profile)
+  print(profile_for_encrypted('foo@bar.com'))
+  print(decrypted_profile)
+  # Now, we need to generate a valid ciphertext, which when decrypted will return a role=admin profile.
+  ciphertext = b"\xb5\xb3b\xc6l\x8f\x1d\xe1e\xb6u'\x80\x1c\x0fxf\x07wr\xc6\xadP\xda\xcb\xd3\xc2O\x9c2\xf5\x1d.\xdb\xec\xb4\xc4q\x1cP\x99Hf\x13\xd5\x9b\x04\xaa"
+  print(decrypt_encrypted_profile(ciphertext))
